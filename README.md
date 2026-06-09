@@ -1,8 +1,4 @@
-##MED_BOT
----
-
-````markdown
-# 🩺 MedAssist: A Medical RAG Chatbot with Image Understanding
+# MED_BOT
 
 ## Table of Contents
 
@@ -106,10 +102,11 @@ cd medical-chatbot
 
 python -m venv venv
 
+# Windows
 venv\Scripts\activate
 
 pip install -r requirements.txt
-````
+```
 
 Run the application:
 
@@ -134,6 +131,3 @@ Python • Flask • LangChain • Pinecone • FAISS • Hugging Face • Llama
 ## License
 
 Licensed under the MIT License. See LICENSE for full details.
-
-```
-```
