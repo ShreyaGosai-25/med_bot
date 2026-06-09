@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Medical Chatbot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        #chatbox {
+            width: 100%;
+            max-width: 800px;
+            height: 400px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 10px;
+            overflow-y: scroll;
+            margin: 0 auto 20px auto;
+            background-color: #fff;
+        }
+
+        .message {
+            margin: 10px 0;
+            padding: 8px 12px;
+            border-radius: 8px;
+            max-width: 70%;
+            word-wrap: break-word;
+        }
+
+        .user {
+            background-color: #d0e7ff;
+            align-self: flex-end;
+            text-align: right;
+            margin-left: auto;
+        }
+
+        .bot {
+            background-color: #d4ffd4;
+            align-self: flex-start;
+            text-align: left;
+            margin-right: auto;
+        }
+
+        #inputSection {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            gap: 10px;
+        }
+
+        #userInput {
+            flex: 1;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+
+        #sendBtn {
+            padding: 10px 20px;
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        #sendBtn:hover {
+            background-color: #45a049;
+        }
+
+        #imageSection {
+            width: 100%;
+            max-width: 800px;
+            margin: 20px auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        #imageResponse {
+            background-color: #fff;
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        button.uploadBtn {
+            padding: 10px 20px;
+            border: none;
+            background-color: #2196F3;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        button.uploadBtn:hover {
+            background-color: #1976D2;
+        }
+
+        form {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+    </style>
+</head>
+<body>
+    <h1>Medical Chatbot</h1>
+
+    <!-- Chatbox -->
+    <div id="chatbox"></div>
+
+    <!-- Text chat input -->
+    <div id="inputSection">
+        <input type="text" id="userInput" placeholder="Type your message here..." />
+        <button id="sendBtn" onclick="sendMessage()">Send</button>
+    </div>
+
+    <hr>
+
+    <!-- Image upload section -->
+    <div id="imageSection">
+        <h3>Upload Image or Take Photo</h3>
+        <form id="imageForm" enctype="multipart/form-data">
+            <input type="file" id="imageInput" name="image" accept="image/*" capture="environment">
+            <button class="uploadBtn" type="submit">Send Image</button>
+        </form>
+
+        <div id="imageResponse"></div>
+    </div>
+
+    <script>
+        const chatbox = document.getElementById("chatbox");
+
+        // -------------------------
+        // Text chat
+        // -------------------------
+        function sendMessage() {
+            const msg = document.getElementById("userInput").value;
+            if (!msg) return;
+
+            appendMessage("user", msg);
+
+            fetch("/get", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: `msg=${encodeURIComponent(msg)}`
+            })
+            .then(response => response.text())
+            .then(data => appendMessage("bot", data));
+
+            document.getElementById("userInput").value = "";
+        }
+
+        function appendMessage(sender, text) {
+            const msgDiv = document.createElement("div");
+            msgDiv.className = `message ${sender}`;
+            msgDiv.innerHTML = `<b>${sender === "user" ? "You" : "Bot"}:</b> ${text}`;
+            chatbox.appendChild(msgDiv);
+            chatbox.scrollTop = chatbox.scrollHeight;
+        }
+
+        // -------------------------
+        // Image chat
+        // -------------------------
+        const imageForm = document.getElementById("imageForm");
+        imageForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const input = document.getElementById("imageInput");
+            if (!input.files[0]) return alert("Please select an image.");
+
+            const formData = new FormData();
+            formData.append("image", input.files[0]);
+
+            const response = await fetch("/image", { method: "POST", body: formData });
+            const data = await response.json();
+
+            // Show image caption + response
+            const imageRespDiv = document.getElementById("imageResponse");
+            imageRespDiv.innerHTML = `
+                <p><b>Caption:</b> ${data.caption}</p>
+                <p><b>Bot Response:</b> ${data.response}</p>
+            `;
+
+            appendMessage("user", "[Sent an image]");
+            appendMessage("bot", data.response);
+        });
+    </script>
+</body>
+</html>
