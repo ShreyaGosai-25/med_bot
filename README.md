@@ -128,6 +128,4 @@ Python • Flask • LangChain • Pinecone • FAISS • Hugging Face • Llama
 
 ---
 
-## License
 
-Licensed under the MIT License. See LICENSE for full details.
